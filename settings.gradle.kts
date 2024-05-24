@@ -1,4 +1,4 @@
-rootProject.name = "kva-minas"
+rootProject.name = "kva-mauau"
 
 pluginManagement {
     repositories.gradlePluginPortal()
