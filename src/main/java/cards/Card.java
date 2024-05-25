@@ -6,7 +6,7 @@ package cards;
  * @param rank The rank of a playing card.
  * @param suit The suit of a playing card.
  */
-public record Card<parameter>(Rank rank, Suit suit) implements Comparable<Card> {
+public record Card(Rank rank, Suit suit) implements Comparable<Card> {
 
     /**
      * Returns a string representation of the card.
