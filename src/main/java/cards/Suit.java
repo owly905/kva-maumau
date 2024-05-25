@@ -7,19 +7,33 @@ public enum Suit {
     /**
      * Represents the Hearts suit.
      */
-    HEARTS,
+    HEARTS("♥︎"),
     /**
      * Represents the Diamonds suit.
      */
-    DIAMONDS,
+    DIAMONDS("♦︎"),
     /**
      * Represents the Clubs suit.
      */
-    CLUBS,
+    CLUBS("♣︎"),
     /**
      * Represents the Spades suit.
      */
-    SPADES;
+    SPADES("♠︎");
+
+    /**
+     * The symbol associated by the card suit.
+     */
+    private String symbol;
+
+    /**
+     * Constructs a new enum instance with the given symbol.
+     *
+     * @param symbol the symbol that represents the card suit.
+     */
+    Suit(String symbol) {
+        this.symbol = symbol;
+    }
 
     /**
      * Returns a string representation of the suit.
@@ -28,7 +42,6 @@ public enum Suit {
      */
     @Override
     public String toString() {
-        //TODO implement
-        return super.toString();
+        return this.symbol;
     }
 }

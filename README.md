@@ -100,7 +100,7 @@ Im Folgenden ist dieses Verhalten mit **Zustandsautomaten** spezifiziert, die Si
 Verhaltens implementieren sollen. <br>
 Zuvor gehen wir aber auf die zugrunde liegende Struktur ein.
 
-![image](res/pictures/uml-maumau.png)
+<img src="./res/pictures/uml-maumau.png" alt="drawing" width="750"/> <br>
 Klassendiagramm des Mau-Mau-Programms (MVC-Pattern) <br>
 meisten Attribute und Methoden fehlen aus Gründen der Übersichtlichkeit <br>
 ausserhalb vom Model-Block: Klassen gehören zu View und Controller <br>
@@ -167,7 +167,7 @@ Wenn man MauMauGame ohne Kommandozeilenparameter startet, dann wird mittels sein
 ein einfaches Spiel mit einem Skatblatt und den zwei Spielerinnen Jacqueline und Chantal, die beide anfangs je fünf 
 Karten auf die Hand bekommen, gestartet.
 
-![image](res/pictures/sequenzdiagramm-maumau.png)
+<img src="./res/pictures/sequenzdiagramm-maumau.png" alt="drawing" width="750"/> <br>
 Ablauf als Sequenzdiagramm: <br>
 - Dazu ruft `makeSimpleGame` die statische Methode `makeDeck(1)` vom `MauMauDeck` auf (Nachricht 3), 
 die eine gemischte Liste von Spielkarten eines Skatblatts zuruckgibt. (Methode aus Aufgabe 2)
@@ -308,8 +308,8 @@ und dementsprechend "*Mau*" bzw. "*Mau-Mau*" sagen muss, dem nachgekommen ist, b
 abgeschlossen hat. <br>
 Wenn er das vergessen hat, muss er eine Karte vom Zugstapel nehmen (bzw. die Karte wird ihm automatisch zugeteilt). <br>
 
-Zustandsdiagramm: Beschreibt das Verhalten jeder `PlayerHandler`-Instanz
-![image](res/pictures/statechart-playerhandlers.png)
+Zustandsdiagramm: Beschreibt das Verhalten jeder `PlayerHandler`-Instanz <br>
+<img src="./res/pictures/statechart-playerhandlers.png" alt="drawing" width="750"/> <br>
 
 Im Folgenden sind die verwendeten Ereignisse (d.h. Methoden in `PlayerHandler`), die zusätzlichen Bedingungen 
 (jeweils in eckigen Klammern) und die Aktionen (jeweils nach dem Schrägstrich) erklärt. <br>
@@ -344,7 +344,7 @@ Hier empfiehlt sich die Anwendung des State Patterns, wofür Sie natürlich auch
 
 Die Klasse `ActionHandler` verwaltet den gesamten Spielablauf. <br>
 Zustandsdiagramm des `ActionHandlers`: <br>
-![image](res/pictures/statechart-actionhandlers.png) <br>
+<img src="./res/pictures/statechart-actionhandlers.png" alt="drawing" width="750"/> <br>
 Das Spiel läuft im zusammengesetzten Zustand `GamePlay`, in den Zuständen `Game finished` und `Game canceled` 
 endet das Spiel regulär, wenn alle bis auf ein Spieler seine Karten ablegen konnten bzw. im Fall eines Abbruchs, 
 weil die Zahl der zur Verfügung stehenden Karten nicht ausreicht (siehe Abschnitt 7).
@@ -421,14 +421,14 @@ public enum GameState {
 Tabelle fasst zusammen, welchen Wert die `getGameState`-Methode zurückgeben soll, wenn der Automat im jeweiligen Zustand ist. <br>
 Dabei vernachlässigen wir den zusammengesetzten Zustand GamePlay.
 
-| GameState-Wert | korrespondierender Zustand im Automat |
-|---|---------------------------------------|
-|   |                                       |
-| GAME INITIALIZED | Initialized                                    |
-| GAME OVER | Game finished                                    |
-| GAME CANCELED | Game canceled                                    |
-| PLAY | Normal, Jack chosen oder Seven chosen                                    |
-| CHOOSE SUIT | Game finished                                    |
+| GameState-Wert   | korrespondierender Zustand im Automat |
+|------------------|---------------------------------------|
+|                  |                                       |
+| GAME INITIALIZED | Initialized                           |
+| GAME OVER        | Game finished                         |
+| GAME CANCELED    | Game canceled                         |
+| PLAY             | Normal, Jack chosen oder Seven chosen |
+| CHOOSE SUIT      | Game finished                         |
 
 
 ### Aufgabe 4 (ActionHandler)
