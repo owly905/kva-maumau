@@ -73,7 +73,13 @@ class CardHandler {
      * Deals cards to all players.
      */
     void dealCards() {
-        //TODO implement
+        List<Player> players = game.getPlayers();
+        for(int i =0;i<numCardsPerPlayer;i++){
+            for (Player player : players) {
+                player.drawCards(1);
+            }
+        }
+        discard(drawCard()); // Discard the next card to start the game
     }
 
     /**

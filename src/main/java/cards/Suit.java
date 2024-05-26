@@ -28,7 +28,11 @@ public enum Suit {
      */
     @Override
     public String toString() {
-        //TODO implement
-        return super.toString();
+        return switch(this){
+            case HEARTS -> "♥︎";
+            case DIAMONDS -> "♦︎";
+            case CLUBS -> "♣︎";
+            case SPADES -> "♠︎";
+        };
     }
 }

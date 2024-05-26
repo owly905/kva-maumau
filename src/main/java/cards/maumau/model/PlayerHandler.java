@@ -28,7 +28,20 @@ class PlayerHandler {
      * @param n The number of turns to proceed.
      */
     void nextTurn(int n) {
-        //TODO implement
+        if(getCurrentPlayer().getCards().size()==1){
+            remember=getCurrentPlayer();
+            localNextTurn(n);
+            //TODO
+        }
+        else if(getCurrentPlayer().getCards().isEmpty()){
+            remember=getCurrentPlayer();
+            localNextTurn(n);
+            //TODO
+        }
+        else{
+            localNextTurn(n);
+            //TODO
+        }
     }
 
     /**
@@ -37,7 +50,9 @@ class PlayerHandler {
      * @param p The player calling "Mau".
      */
     void mau(Player p) {
-        //TODO implement
+        if(p==remember){
+            //TODO
+        }
     }
 
     /**
@@ -46,7 +61,14 @@ class PlayerHandler {
      * @param p The player calling "Mau-Mau".
      */
     void maumau(Player p) {
-        //TODO implement
+        if(p==remember){
+            finishPlayer(p);
+            if(players.size()==1){
+                finishPlayer(getCurrentPlayer());
+                game.getActionHandler().finishGame();
+                //TODO
+            }
+        }
     }
 
     /**
@@ -74,7 +96,7 @@ class PlayerHandler {
      * @throws IllegalArgumentException if a player with the same name already exists.
      */
     void addPlayer(Player player) {
-        //TODO implement
+        players.add(player);
     }
 
     /**
@@ -83,7 +105,11 @@ class PlayerHandler {
      * @param n The number of turns to proceed.
      */
     private void localNextTurn(int n) {
-        //TODO implement
+        for(int i=0;i<n;i++){
+            Player p = players.getFirst();
+            players.remove(0);
+            players.add(players.size(),p);
+        }
     }
 
     /**
@@ -92,7 +118,13 @@ class PlayerHandler {
      * @param p The player to finish.
      */
     private void finishPlayer(Player p) {
-        //TODO implement
+        for(int i =0;i<players.size();i++){
+            if(players.get(i)==p){
+                players.remove(i);
+                ranking.add(p);
+                break;
+            }
+        }
     }
 
     /**

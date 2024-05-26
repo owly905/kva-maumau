@@ -26,7 +26,8 @@ class ActionHandler {
      * @param player The player to be added to the game.
      */
     void addPlayer(Player player) {
-        //TODO implement
+        PlayerHandler a = game.getPlayerHandler();
+        a.addPlayer(player);
     }
 
     /**

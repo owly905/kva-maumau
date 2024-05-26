@@ -24,6 +24,10 @@ dependencies {
         because("allows tests to run from IDEs that bundle older version of launcher")
     }
 }
+java {
+    sourceCompatibility = JavaVersion.VERSION_16
+    targetCompatibility = JavaVersion.VERSION_16
+}
 
 tasks.test {
     useJUnitPlatform {

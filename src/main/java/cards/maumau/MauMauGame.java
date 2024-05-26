@@ -37,6 +37,7 @@ public class MauMauGame {
 
     /**
      * Runs a simple game with predefined settings.
+     *
      */
     private static void makeSimpleGame() {
         final List<Card> deck = MauMauDeck.makeDeck(1);
