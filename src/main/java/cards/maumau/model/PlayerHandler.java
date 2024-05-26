@@ -74,7 +74,7 @@ class PlayerHandler {
      * @throws IllegalArgumentException if a player with the same name already exists.
      */
     void addPlayer(Player player) {
-        //TODO implement
+        players.add(player);
     }
 
     /**

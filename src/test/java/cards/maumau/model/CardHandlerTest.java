@@ -29,7 +29,39 @@ public class CardHandlerTest {
 
     @Test
     public void dealCardsTest() {
-        final List<Card> deck = List.of(c(JACK, DIAMONDS), c(SEVEN, CLUBS), c(QUEEN, DIAMONDS), c(NINE, CLUBS), c(ACE, SPADES), c(NINE, SPADES), c(ACE, DIAMONDS), c(EIGHT, CLUBS), c(EIGHT, DIAMONDS), c(KING, HEARTS), c(ACE, HEARTS), c(SEVEN, SPADES), c(KING, CLUBS), c(KING, SPADES), c(QUEEN, SPADES), c(SEVEN, DIAMONDS), c(TEN, DIAMONDS), c(EIGHT, HEARTS), c(KING, DIAMONDS), c(QUEEN, CLUBS), c(JACK, HEARTS), c(EIGHT, SPADES), c(TEN, CLUBS), c(ACE, CLUBS), c(JACK, CLUBS), c(QUEEN, HEARTS), c(SEVEN, HEARTS), c(JACK, SPADES), c(NINE, DIAMONDS), c(NINE, HEARTS), c(TEN, HEARTS), c(TEN, SPADES));
+        final List<Card> deck = List.of(
+                c(JACK, DIAMONDS),
+                c(SEVEN, CLUBS),
+                c(QUEEN, DIAMONDS),
+                c(NINE, CLUBS),
+                c(ACE, SPADES),
+                c(NINE, SPADES),
+                c(ACE, DIAMONDS),
+                c(EIGHT, CLUBS),
+                c(EIGHT, DIAMONDS),
+                c(KING, HEARTS),
+                c(ACE, HEARTS),
+                c(SEVEN, SPADES),
+                c(KING, CLUBS),
+                c(KING, SPADES),
+                c(QUEEN, SPADES),
+                c(SEVEN, DIAMONDS),
+                c(TEN, DIAMONDS),
+                c(EIGHT, HEARTS),
+                c(KING, DIAMONDS),
+                c(QUEEN, CLUBS),
+                c(JACK, HEARTS),
+                c(EIGHT, SPADES),
+                c(TEN, CLUBS),
+                c(ACE, CLUBS),
+                c(JACK, CLUBS),
+                c(QUEEN, HEARTS),
+                c(SEVEN, HEARTS),
+                c(JACK, SPADES),
+                c(NINE, DIAMONDS),
+                c(NINE, HEARTS),
+                c(TEN, HEARTS),
+                c(TEN, SPADES));
         final MauMau game = new MauMau(5, deck);
         final Player jacqueline = game.addPlayer("Jacqueline");
         final Player chantal = game.addPlayer("Chantal");

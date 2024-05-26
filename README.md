@@ -61,7 +61,7 @@ Chantal und  Cheyenne. Die Kommandozeilenparameter sind daher: `4 1 Jacqueline C
 
 Das Programm zeigt dann für jeden Mitspieler ein eigenes Fenster. <br>
 Die Reihenfolge der Spieler ist in jedem Fenster in einer Tabelle rechts oben zu sehen, zusammen mit der Information,
-wie viele Karten jede Mitspielerin noch auf der Hand hat. <br>
+wie viele Karten jeder Mitspieler noch auf der Hand hat. <br>
 An der Reihe ist jeweils der erstgenannte Spieler, d.h. der Tabelleninhalt ändert sich mit fortlaufendem Spiel ständig. <br>
 Zusätzlich gibt der grüne Fensterrahmen an, wer an der Reihe ist; alle anderen Fenster haben einen roten Rahmen.
 
@@ -168,7 +168,8 @@ ein einfaches Spiel mit einem Skatblatt und den zwei Spielerinnen Jacqueline und
 Karten auf die Hand bekommen, gestartet.
 
 <img src="./res/pictures/sequenzdiagramm-maumau.png" alt="drawing" width="750"/> <br>
-Ablauf als Sequenzdiagramm: <br>
+Ablauf als Sequenzdiagramm:
+
 - Dazu ruft `makeSimpleGame` die statische Methode `makeDeck(1)` vom `MauMauDeck` auf (Nachricht 3), 
 die eine gemischte Liste von Spielkarten eines Skatblatts zuruckgibt. (Methode aus Aufgabe 2)
 - Mit Nachricht 6 wird eine Instanz der Klasse `MauMau` mit dieser Liste als Kartenstapel und der Anzahl anfänglich
