@@ -35,12 +35,14 @@ public class MauMauDeck {
         }
 
         List<Card> deck = new ArrayList<>(numDecks * STANDARD_DECK_SIZE);
-        Rank[] validRanks = new Rank[]{Rank.SEVEN, Rank.EIGHT, Rank.NINE, Rank.TEN, Rank.JACK, Rank.QUEEN, Rank.KING, Rank.ACE};
 
         for (int i = 0; i < numDecks; i++) {
-            for (Rank r : validRanks) {
-                for (Suit s : Suit.values()) {
-                    deck.add(new Card(r, s));
+            for (Rank r : Rank.values()) {
+                if (r.ordinal() > 4) {
+                    for (Suit s : Suit.values()) {
+                        Card card = new Card(r, s);
+                        deck.add(card);
+                    }
                 }
             }
         }
