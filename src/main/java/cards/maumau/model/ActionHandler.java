@@ -1,6 +1,7 @@
 package cards.maumau.model;
 
 import cards.Card;
+import cards.Rank;
 import cards.Suit;
 
 /**
@@ -10,6 +11,8 @@ class ActionHandler {
     private final MauMau game;
     private Suit chosenSuit;
     private int ctr7 = 0;
+    private final Automaton auto = new Automaton(this);
+    private GameState gameState;
 
     /**
      * Constructs an ActionHandler for the specified MauMau game.
@@ -33,21 +36,21 @@ class ActionHandler {
      * Starts the game.
      */
     void startGame() {
-        //TODO implement
+        auto.startGame();
     }
 
     /**
      * Transitions the game state to GAME_OVER.
      */
     void finishGame() {
-        //TODO implement
+        auto.finishGame();
     }
 
     /**
      * Transitions the game state to GAME_CANCELED.
      */
     void cancelGame() {
-        //TODO implement
+        auto.cancelGame();
     }
 
     /**
@@ -56,30 +59,30 @@ class ActionHandler {
      * @param c The card chosen by the player.
      */
     void chooseCard(Card c) {
-        //TODO implement
+        auto.chooseCard(c);
     }
 
     /**
      * Handles the player's choice of a suit in the current state.
      *
-     * @param suit The suit chosen by the player.
+     * @param s The suit chosen by the player.
      */
-    void chooseSuit(Suit suit) {
-        //TODO implement
+    void chooseSuit(Suit s) {
+        auto.chooseSuit(s);
     }
 
     /**
      * Lets the player skip a round.
      **/
     void skip() {
-        //TODO implement
+        auto.skip();
     }
 
     /**
      * Handles the player saying "no 7" in the current state.
      */
     void no7() {
-        //TODO implement
+        auto.no7();
     }
 
     /**
@@ -136,8 +139,11 @@ class ActionHandler {
      * Returns the current state of the game.
      */
     GameState getGameState() {
-        //TODO implement
-        return null;
+        return gameState;
+    }
+
+    void setGameState(GameState gameState) {
+        this.gameState = gameState;
     }
 
     /**
@@ -147,7 +153,23 @@ class ActionHandler {
      * @return True if the card can be played, false otherwise.
      */
     boolean canPlay(Card c) {
-        //TODO implement
+        State<?> currentState = auto.getState();
+        Card topCard = game.getCardHandler().top();
+
+        if (currentState instanceof GamePlay) {
+            State<?> innerState = ((GamePlay) currentState).getInnerState();
+
+            if (innerState instanceof SuitChosen) {
+                return c.suit() == getChosenSuit() && c.rank() != Rank.JACK;
+            }
+            else if (innerState instanceof SevenChosen) {
+                return c.suit() == topCard.suit() || c.rank() == topCard.rank() || c.rank() == Rank.SEVEN;
+            }
+            else if (innerState instanceof Normal) {
+                return c.suit() == topCard.suit() || c.rank() == topCard.rank() || c.rank() == Rank.JACK;
+            }
+        }
+
         return false;
     }
 }

@@ -18,6 +18,7 @@ class PlayerHandler {
     }
 
     private final State WaitForNextTurn = new State() {
+        @Override
         void nextTurn(int n) {
             if (getCurrentPlayer().getCards().size() == 1) {
                 remember = getCurrentPlayer();
@@ -37,16 +38,23 @@ class PlayerHandler {
     };
 
     private final State WaitForMau = new State() {
+        @Override
         void mau(Player p) {
             if (p == remember) {state = WaitForNextTurn;}
         }
 
+        @Override
         void nextTurn(int n) {
             remember.drawCards(1);
             if (getCurrentPlayer().getCards().isEmpty()) {
                 remember = getCurrentPlayer();
                 localNextTurn(n);
                 state = WaitForMauMau;
+            }
+            else if (getCurrentPlayer().getCards().size() == 1) {
+                remember = getCurrentPlayer();
+                localNextTurn(n);
+                state = WaitForMau;
             }
             else {
                 localNextTurn(n);
@@ -56,6 +64,7 @@ class PlayerHandler {
     };
 
     private final State WaitForMauMau = new State() {
+        @Override
         void maumau(Player p) {
             if (p == remember) {
                 finishPlayer(p);
@@ -70,6 +79,7 @@ class PlayerHandler {
             }
         }
 
+        @Override
         void nextTurn(int n) {
             remember.drawCards(1);
             if (getCurrentPlayer().getCards().size() == 1) {
@@ -84,8 +94,7 @@ class PlayerHandler {
         }
     };
 
-    private final State Finished = new State() {
-    };
+    private final State Finished = new State() {};
 
     private final MauMau game;
     private final List<Player> players = new LinkedList<>();
@@ -163,6 +172,10 @@ class PlayerHandler {
      * @param n The number of turns to proceed.
      */
     private void localNextTurn(int n) {
+        if (n < 1) {
+            throw new IllegalArgumentException("Not a negative number!");
+        }
+
         for (int i = 0; i < n; i++) {
             players.addLast(players.removeFirst());
         }
