@@ -1,6 +1,7 @@
 package cards.maumau.model;
 
 import cards.Card;
+import cards.Rank;
 import cards.Suit;
 
 import java.util.ArrayList;
@@ -87,6 +88,20 @@ public class Player {
         if (!cards.remove(c))
             throw new IllegalArgumentException(this + " doesn't have " + c);
         game.getCardHandler().discard(c);
+        // TODO
+        // Added with diagramm of actionhandler
+        if(c.rank() == Rank.EIGHT){
+            game.getPlayerHandler().nextTurn(2);
+        }
+        else if(c.rank()==Rank.JACK){
+            chooseSuit(c.suit()); // TODO
+            game.getActionHandler().setChosenSuit(c.suit());
+            game.getPlayerHandler().nextTurn(1);
+        }
+        else if(c.rank()==Rank.SEVEN){
+            game.getActionHandler().increment7Counter();
+            game.getPlayerHandler().nextTurn(1);
+        }
     }
 
     /**

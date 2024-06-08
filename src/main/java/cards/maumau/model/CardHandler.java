@@ -55,7 +55,7 @@ class CardHandler {
         if (drawPile.isEmpty())
             reuseDiscardedCards();
         if (!drawPile.isEmpty())
-            return drawPile.removeFirst();
+            return drawPile.remove(0);
         game.getActionHandler().cancelGame();
         return null;
     }

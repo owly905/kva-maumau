@@ -7,11 +7,100 @@ import java.util.List;
 /**
  * Handles players in a MauMau game.
  */
-class PlayerHandler {
+
+public class PlayerHandler {
     private final MauMau game;
     private final List<Player> players = new LinkedList<>();
     private final List<Player> ranking = new ArrayList<>();
     private Player remember;
+
+    public Player getRemember() {
+        return remember;
+    }
+
+    private State state;
+
+    public void setPlayerhandlerstate(State playerhandlerstate) {
+        this.state = playerhandlerstate;
+    }
+
+    private abstract class State {
+        void mau(Player p) {}
+
+        void maumau(Player p) {}
+
+        void nextTurn(int n) {}
+    }
+
+    private final State WaitForNextTurn = new State() {
+        void nextTurn(int n) {
+            if (getCurrentPlayer().getCards().size() == 1) {
+                remember = getCurrentPlayer();
+                localNextTurn(n);
+                state = WaitForMau;
+            }
+            else if (getCurrentPlayer().getCards().isEmpty()) {
+                remember = getCurrentPlayer();
+                localNextTurn(n);
+                state = WaitForMauMau;
+            }
+            else {
+                localNextTurn(n);
+                state = WaitForNextTurn;
+            }
+        }
+    };
+
+    private final State WaitForMau = new State() {
+        void mau(Player p) {
+            if (p == remember) {state = WaitForNextTurn;}
+        }
+
+        void nextTurn(int n) {
+            remember.drawCards(1);
+            if (getCurrentPlayer().getCards().isEmpty()) {
+                remember = getCurrentPlayer();
+                localNextTurn(n);
+                state = WaitForMauMau;
+            }
+            else {
+                localNextTurn(n);
+                state = WaitForNextTurn;
+            }
+        }
+    };
+
+    private final State WaitForMauMau = new State() {
+        void maumau(Player p) {
+            if (p == remember) {
+                finishPlayer(p);
+                if (players.size() == 1) {
+                    finishPlayer(getCurrentPlayer());
+                    game.getActionHandler().finishGame();
+                    state = Finished;
+                }
+                else {
+                    state = WaitForNextTurn;
+                }
+            }
+        }
+
+        void nextTurn(int n) {
+            remember.drawCards(1);
+            if (getCurrentPlayer().getCards().size() == 1) {
+                remember = getCurrentPlayer();
+                localNextTurn(n);
+                state = WaitForMau;
+            }
+            else {
+                localNextTurn(n);
+                state = WaitForNextTurn;
+            }
+        }
+    };
+
+    private final State Finished = new State() {
+    };
 
     /**
      * Constructs a PlayerHandler for the specified MauMau game.
@@ -20,6 +109,7 @@ class PlayerHandler {
      */
     PlayerHandler(MauMau game) {
         this.game = game;
+        setPlayerhandlerstate(WaitForNextTurn);
     }
 
     /**
@@ -28,20 +118,7 @@ class PlayerHandler {
      * @param n The number of turns to proceed.
      */
     void nextTurn(int n) {
-        if(getCurrentPlayer().getCards().size()==1){
-            remember=getCurrentPlayer();
-            localNextTurn(n);
-            //TODO
-        }
-        else if(getCurrentPlayer().getCards().isEmpty()){
-            remember=getCurrentPlayer();
-            localNextTurn(n);
-            //TODO
-        }
-        else{
-            localNextTurn(n);
-            //TODO
-        }
+        state.nextTurn(n);
     }
 
     /**
@@ -50,9 +127,7 @@ class PlayerHandler {
      * @param p The player calling "Mau".
      */
     void mau(Player p) {
-        if(p==remember){
-            //TODO
-        }
+        state.mau(p);
     }
 
     /**
@@ -61,14 +136,7 @@ class PlayerHandler {
      * @param p The player calling "Mau-Mau".
      */
     void maumau(Player p) {
-        if(p==remember){
-            finishPlayer(p);
-            if(players.size()==1){
-                finishPlayer(getCurrentPlayer());
-                game.getActionHandler().finishGame();
-                //TODO
-            }
-        }
+        state.maumau(p);
     }
 
     /**
@@ -105,10 +173,8 @@ class PlayerHandler {
      * @param n The number of turns to proceed.
      */
     private void localNextTurn(int n) {
-        for(int i=0;i<n;i++){
-            Player p = players.getFirst();
-            players.remove(0);
-            players.add(players.size(),p);
+        for (int i = 0; i < n; i++) {
+            players.addLast(players.removeFirst());
         }
     }
 
@@ -118,13 +184,8 @@ class PlayerHandler {
      * @param p The player to finish.
      */
     private void finishPlayer(Player p) {
-        for(int i =0;i<players.size();i++){
-            if(players.get(i)==p){
-                players.remove(i);
-                ranking.add(p);
-                break;
-            }
-        }
+        players.remove(p);
+        ranking.add(p);
     }
 
     /**

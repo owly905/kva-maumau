@@ -1,6 +1,7 @@
 package cards.maumau.model;
 
 import cards.Card;
+import cards.Rank;
 import cards.Suit;
 
 /**
@@ -10,7 +11,7 @@ class ActionHandler {
     private final MauMau game;
     private Suit chosenSuit;
     private int ctr7 = 0;
-
+    private GameState gameState;
     /**
      * Constructs an ActionHandler for the specified MauMau game.
      *
@@ -26,15 +27,14 @@ class ActionHandler {
      * @param player The player to be added to the game.
      */
     void addPlayer(Player player) {
-        PlayerHandler a = game.getPlayerHandler();
-        a.addPlayer(player);
+        game.getPlayerHandler().addPlayer(player);
     }
 
     /**
      * Starts the game.
      */
     void startGame() {
-        //TODO implement
+        game.getCardHandler().dealCards();
     }
 
     /**
@@ -57,7 +57,17 @@ class ActionHandler {
      * @param c The card chosen by the player.
      */
     void chooseCard(Card c) {
-        //TODO implement
+        //TODO
+        /*
+        if(game.getPlayerHandler().getCurrentPlayer().canPlay(c)){
+            game.getPlayerHandler().getCurrentPlayer().playCard(c);
+            setChosenSuit(null);
+        }
+        else{
+
+        }
+        */
+
     }
 
     /**
@@ -66,21 +76,26 @@ class ActionHandler {
      * @param suit The suit chosen by the player.
      */
     void chooseSuit(Suit suit) {
-        //TODO implement
+        //TODO
     }
 
     /**
      * Lets the player skip a round.
      **/
     void skip() {
-        //TODO implement
+        //TODO
+        /*
+        game.getCardHandler().drawCard();
+        game.getPlayerHandler().nextTurn(1);
+
+         */
     }
 
     /**
      * Handles the player saying "no 7" in the current state.
      */
     void no7() {
-        //TODO implement
+        //TODO
     }
 
     /**
@@ -137,8 +152,7 @@ class ActionHandler {
      * Returns the current state of the game.
      */
     GameState getGameState() {
-        //TODO implement
-        return null;
+        return gameState;
     }
 
     /**

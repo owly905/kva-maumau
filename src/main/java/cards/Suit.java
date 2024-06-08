@@ -7,19 +7,23 @@ public enum Suit {
     /**
      * Represents the Hearts suit.
      */
-    HEARTS,
+    HEARTS("♥︎"),
     /**
      * Represents the Diamonds suit.
      */
-    DIAMONDS,
+    DIAMONDS("♦︎"),
     /**
      * Represents the Clubs suit.
      */
-    CLUBS,
+    CLUBS("♣︎"),
     /**
      * Represents the Spades suit.
      */
-    SPADES;
+    SPADES("♠︎");
+    private final String suit;
+    Suit(String s){
+        suit=s;
+    }
 
     /**
      * Returns a string representation of the suit.
@@ -28,11 +32,6 @@ public enum Suit {
      */
     @Override
     public String toString() {
-        return switch(this){
-            case HEARTS -> "♥︎";
-            case DIAMONDS -> "♦︎";
-            case CLUBS -> "♣︎";
-            case SPADES -> "♠︎";
-        };
+        return suit;
     }
 }

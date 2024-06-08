@@ -23,33 +23,14 @@ public record Card(Rank rank, Suit suit) implements Comparable<Card> {
      */
     @Override
     public int compareTo(Card other) {
-        if( this.rank==other.rank && this.suit==other.suit){
-            return 0;
+        if (other == null) {
+            throw new NullPointerException();
         }
-        else if(this.rank.compareTo(other.rank)==1){ // wenn this größer ist return 1 => true
-            return 1;
+        if (this.rank.compareTo(other.rank) != 0) {
+            return this.rank.compareTo(other.rank);
         }
-        else if (this.rank.compareTo(other.rank)==-1) {
-            return -1;
-        }
-        else{  // if (this.rank.compareTo(other.rank)==0)
-            if(this.suit.compareTo(other.suit)==1){
-                return 1;
-            }
-            else{
-                return 0;
-            }
+        else {
+            return this.suit.compareTo(other.suit);
         }
     }
 }
-
-/**
- * public int compareTo(Card other) {
- *         int rankComparison = this.rank.compareTo(other.rank);
- *         if (rankComparison != 0) {
- *             return rankComparison;
- *         } else {
- *             return this.suit.compareTo(other.suit);
- *         }
- *     }
- */
