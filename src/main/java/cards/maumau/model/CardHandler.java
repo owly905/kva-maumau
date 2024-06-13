@@ -55,7 +55,7 @@ class CardHandler {
         if (drawPile.isEmpty())
             reuseDiscardedCards();
         if (!drawPile.isEmpty())
-            return drawPile.remove(0);
+            return drawPile.removeFirst();
         game.getActionHandler().cancelGame();
         return null;
     }
@@ -73,13 +73,12 @@ class CardHandler {
      * Deals cards to all players.
      */
     void dealCards() {
-        List<Player> players = game.getPlayers();
-        for(int i =0;i<numCardsPerPlayer;i++){
-            for (Player player : players) {
+        for (int index = 0; index < this.numCardsPerPlayer; index++) {
+            for (Player player: this.game.getPlayers()) {
                 player.drawCards(1);
             }
         }
-        discard(drawCard()); // Discard the next card to start the game
+        this.discardPile.add(this.drawPile.removeFirst());
     }
 
     /**

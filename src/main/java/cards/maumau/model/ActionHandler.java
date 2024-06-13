@@ -8,157 +8,21 @@ import cards.Suit;
  * Manages the actions and state transitions within a MauMau game.
  */
 class ActionHandler {
-
     private final MauMau game;
     private Suit chosenSuit;
     private int ctr7 = 0;
-    private State state;
-
-    public State getState() {return state;}
-
-    public void setState(State state) {
-        State formerstate = this.state;
-        this.state = state;
-        if (state == Game_intialized) {
-            state.setInnerState(state.getInnerState());
-            gameState = GameState.GAME_INITIALIZED;
-        } // init
-
-        if (formerstate == Game_intialized) {
-            state.setInnerState(state.getInnerState());
-            gameState = GameState.PLAY;
-        }// Übergang von init zu play
-
-        if (formerstate == Game_Play && state == Choose_Suit) {
-            state.setInnerState(state.getInnerState());
-            gameState = GameState.CHOOSE_SUIT;
-        } // Übergang von play zu choose suit
-
-        if (formerstate == Choose_Suit) {
-            state.setInnerState(state.getInnerState2());
-            gameState = GameState.PLAY;
-        } // Übergang von choose suit zu play
-
-        if (state == Game_Canceled) {
-            state.setInnerState(state.getInnerState());
-            gameState = GameState.GAME_CANCELED;
-        }
-
-        if (state == Game_Over) {
-            state.setInnerState(state.getInnerState());
-            gameState = GameState.GAME_OVER;
-        }
-    }
-
-    private GameState gameState;
-
-    public abstract class State {
-        private ActionHandler actionHandler;
-
-        public ActionHandler getActionHandler() {return actionHandler;}
-
-        private InnerState innerState;
-
-        public InnerState getInnerState0() {
-            return innerState;
-        }
-
-        public void setInnerState(InnerState innerstate) {
-            this.innerState = innerstate;
-        }
-
-        void startGame() {innerState.startGame();}
-
-        void finishGame() {innerState.finishGame();}
-
-        void cancelGame() {innerState.cancelGame();}
-
-        void chooseCard(Card c) {innerState.chooseCard(c);}
-
-        void chooseSuit(Suit suit) {innerState.chooseSuit(suit);}
-
-        void skip() {innerState.skip();}
-
-        void no7() {innerState.no7();}
-
-        public InnerState getInnerState() {return null;}
-
-        public InnerState getInnerState2() {return null;}
-
-        public InnerState getInnerState3() {return null;}
-
-        State(ActionHandler a) {
-            actionHandler = a;
-        }
-    }
-
-    public final State Game_intialized = new State(this) {
-        final Initialzed initialzed = new Initialzed(getActionHandler());
-
-        @Override
-        public InnerState getInnerState() {return initialzed;}
-    };
-
-    public final State Game_Play = new State(this) {
-        final Normal normal = new Normal(getActionHandler());
-        final SevenChosen sevenChosen = new SevenChosen(getActionHandler());
-        final SuitChosen suitChosen = new SuitChosen(getActionHandler());
-
-        @Override
-        public InnerState getInnerState() {return normal;}
-
-        @Override
-        public InnerState getInnerState2() {return suitChosen;}
-
-        @Override
-        public InnerState getInnerState3() {return sevenChosen;}
-    };
-
-    public final State Game_Over = new State(this) {
-        final GameFinished gameFinished = new GameFinished(getActionHandler());
-
-        @Override
-        public InnerState getInnerState() {return gameFinished;}
-    };
-
-    public final State Game_Canceled = new State(this) {
-        private final GameCanceled gameCanceled = new GameCanceled(getActionHandler());
-
-        @Override
-        public InnerState getInnerState() {return gameCanceled;}
-    };
-
-    public final State Choose_Suit = new State(this) {
-        private final JackChosen jackChosen = new JackChosen(getActionHandler());
-
-        @Override
-        public InnerState getInnerState() {return jackChosen;}
-    };
 
     /**
-     * Keine Ahnung nicht löschen
-     *
-     * @return
+     * State pattern.
      */
-    public State getGame_intialized() {
-        return Game_intialized;
-    }
-
-    public State getGame_Play() {
-        return Game_Play;
-    }
-
-    public State getGame_Over() {
-        return Game_Over;
-    }
-
-    public State getGame_Canceled() {
-        return Game_Canceled;
-    }
-
-    public State getChoose_Suit() {
-        return Choose_Suit;
-    }
+    private final GamePlayState initializedState = new InitializedState();
+    private final GamePlayState normalState = new NormalState();
+    private final GamePlayState sevenChosenState = new SevenChosenState();
+    private final GamePlayState suitChosenState = new SuitChosenState();
+    private final GamePlayState jackChosenState = new JackChosenState();
+    private final GamePlayState gameFinishedState = new GameFinishedState();
+    private final GamePlayState gameCanceledState = new GameCanceledState();
+    private GamePlayState gamePlayState;
 
     /**
      * Constructs an ActionHandler for the specified MauMau game.
@@ -167,7 +31,7 @@ class ActionHandler {
      */
     ActionHandler(MauMau game) {
         this.game = game;
-        setState(getGame_intialized());
+        this.gamePlayState = initializedState;
     }
 
     /**
@@ -176,29 +40,28 @@ class ActionHandler {
      * @param player The player to be added to the game.
      */
     void addPlayer(Player player) {
-        game.getPlayerHandler().addPlayer(player);
+        this.gamePlayState.addPlayer(player);
     }
 
     /**
      * Starts the game.
      */
     void startGame() {
-        setState(getGame_intialized());
-        state.startGame();
+        this.gamePlayState.startGame();
     }
 
     /**
      * Transitions the game state to GAME_OVER.
      */
     void finishGame() {
-        state.finishGame();
+        this.gamePlayState.finishGame();
     }
 
     /**
      * Transitions the game state to GAME_CANCELED.
      */
     void cancelGame() {
-        state.cancelGame();
+        this.gamePlayState.cancelGame();
     }
 
     /**
@@ -207,17 +70,7 @@ class ActionHandler {
      * @param c The card chosen by the player.
      */
     void chooseCard(Card c) {
-        state.chooseCard(c);
-        /*
-        if(game.getPlayerHandler().getCurrentPlayer().canPlay(c)){
-            game.getPlayerHandler().getCurrentPlayer().playCard(c);
-            setChosenSuit(null);
-        }
-        else{
-
-        }
-        */
-
+        this.gamePlayState.chooseCard(c);
     }
 
     /**
@@ -226,26 +79,21 @@ class ActionHandler {
      * @param suit The suit chosen by the player.
      */
     void chooseSuit(Suit suit) {
-        state.chooseSuit(suit);
+        this.gamePlayState.chooseSuit(suit);
     }
 
     /**
      * Lets the player skip a round.
      **/
     void skip() {
-        state.skip();
-        /*
-        game.getCardHandler().drawCard();
-        game.getPlayerHandler().nextTurn(1);
-
-         */
+        this.gamePlayState.skip();
     }
 
     /**
      * Handles the player saying "no 7" in the current state.
      */
     void no7() {
-        state.no7();
+        this.gamePlayState.no7();
     }
 
     /**
@@ -302,7 +150,13 @@ class ActionHandler {
      * Returns the current state of the game.
      */
     GameState getGameState() {
-        return gameState;
+        return switch (gamePlayState) {
+            case InitializedState s -> GameState.GAME_INITIALIZED;
+            case JackChosenState s -> GameState.CHOOSE_SUIT;
+            case GameFinishedState s -> GameState.GAME_OVER;
+            case GameCanceledState s -> GameState.GAME_CANCELED;
+            default -> GameState.PLAY;
+        };
     }
 
     /**
@@ -312,23 +166,621 @@ class ActionHandler {
      * @return True if the card can be played, false otherwise.
      */
     boolean canPlay(Card c) {
-        State currentState = getState();
-        Card topCard = game.getCardHandler().top();
+        if (gamePlayState == suitChosenState) {
+            return c.suit() == getChosenSuit() && c.rank() != Rank.JACK;
+        } else if (gamePlayState == sevenChosenState) {
+            return c.rank() == Rank.SEVEN;
+        } else if (gamePlayState == normalState) {
+            Card top = game.getCardHandler().getDiscardPile().getFirst();
+            return c.rank() == top.rank() || c.suit() == top.suit() || c.rank() == Rank.JACK;
+        }
+        return false;
+    }
 
-        if (currentState == this.getGame_Play()) {
-            InnerState innerState = currentState.innerState;
+    /**
+     * This abstract inner class defines the game state.
+     * It contains all necessary methods to perform as a state pattern.
+     */
+    private abstract class GamePlayState {
+        /**
+         * This method will be used to add the given player parameter to the game.
+         *
+         * @param player as the new player for a game as a Player object.
+         */
+        public abstract void addPlayer(Player player);
 
-            if (innerState instanceof SuitChosen) {
-                return c.suit() == getChosenSuit() && c.rank() != Rank.JACK;
-            }
-            else if (innerState instanceof SevenChosen) {
-                return c.suit() == topCard.suit() || c.rank() == topCard.rank() || c.rank() == Rank.SEVEN;
-            }
-            else if (innerState instanceof Normal) {
-                return c.suit() == topCard.suit() || c.rank() == topCard.rank() || c.rank() == Rank.JACK;
+        /**
+         * This method will be used to start the game.
+         */
+        public abstract void startGame();
+
+        /**
+         * This method will be used to choose the given c parameter.
+         *
+         * @param c as the chosen card as a Card object.
+         */
+        public abstract void chooseCard(Card c);
+
+        /**
+         * This method will be used to skip the current turn.
+         */
+        public abstract void skip();
+
+        /**
+         * This method will be used to choose the given suit parameter.
+         *
+         * @param suit as the new suit as a Suit enumeration.
+         */
+        public abstract void chooseSuit(Suit suit);
+
+        /**
+         * This method will be used whenever a card with the number seven was played.
+         */
+        public abstract void no7();
+
+        /**
+         * This method will be used to finish the game.
+         */
+        public abstract void finishGame();
+
+        /**
+         * This method will be used to cancel the game.
+         */
+        public abstract void cancelGame();
+    }
+
+    private class InitializedState extends GamePlayState {
+        /**
+         * This method will be used to add the given player parameter to the game.
+         *
+         * @param player as the new player for a game as a Player object.
+         */
+        @Override
+        public void addPlayer(Player player) {
+            game.getPlayerHandler().addPlayer(player);
+        }
+
+        /**
+         * This method will be used to start the game.
+         */
+        @Override
+        public void startGame() {
+            gamePlayState = normalState;
+            game.getCardHandler().dealCards();
+        }
+
+        /**
+         * This method will be used to choose the given c parameter.
+         *
+         * @param c as the chosen card as a Card object.
+         */
+        @Override
+        public void chooseCard(Card c) {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to skip the current turn.
+         */
+        @Override
+        public void skip() {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to choose the given suit parameter.
+         *
+         * @param suit as the new suit as a Suit enumeration.
+         */
+        @Override
+        public void chooseSuit(Suit suit) {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used whenever a player can't play a card with the number seven.
+         */
+        @Override
+        public void no7() {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to finish the game.
+         */
+        @Override
+        public void finishGame() {
+            gamePlayState = gameFinishedState;
+        }
+
+        /**
+         * This method will be used to cancel the game.
+         */
+        @Override
+        public void cancelGame() {
+            gamePlayState = gameCanceledState;
+        }
+    }
+
+    /**
+     * This inner class defines the normal state.
+     */
+    private class NormalState extends GamePlayState {
+        /**
+         * This method will be used to add the given player parameter to the game.
+         *
+         * @param player as the new player for a game as a Player object.
+         */
+        @Override
+        public void addPlayer(Player player) {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to start the game.
+         */
+        @Override
+        public void startGame() {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to choose the given c parameter.
+         *
+         * @param c as the chosen card as a Card object.
+         */
+        @Override
+        public void chooseCard(Card c) {
+            if (canPlay(c)) {
+                game.getPlayerHandler().getCurrentPlayer().playCard(c);
+                if (c.rank() == Rank.JACK) {
+                    gamePlayState = jackChosenState;
+                } else if (c.rank() == Rank.SEVEN) {
+                    increment7Counter();
+                    game.getPlayerHandler().nextTurn(1);
+                    gamePlayState = sevenChosenState;
+                } else if (c.rank() == Rank.EIGHT) {
+                    game.getPlayerHandler().nextTurn(2);
+                } else {
+                    game.getPlayerHandler().nextTurn(1);
+                }
             }
         }
 
-        return false;
+        /**
+         * This method will be used to skip the current turn.
+         */
+        @Override
+        public void skip() {
+            game.getPlayerHandler().getCurrentPlayer().drawCards(1);
+            game.getPlayerHandler().nextTurn(1);
+        }
+
+        /**
+         * This method will be used to choose the given suit parameter.
+         *
+         * @param suit as the new suit as a Suit enumeration.
+         */
+        @Override
+        public void chooseSuit(Suit suit) {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used whenever a player can't play a card with the number seven.
+         */
+        @Override
+        public void no7() {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to finish the game.
+         */
+        @Override
+        public void finishGame() {
+            gamePlayState = gameFinishedState;
+        }
+
+        /**
+         * This method will be used to cancel the game.
+         */
+        @Override
+        public void cancelGame() {
+            gamePlayState = gameCanceledState;
+        }
+    }
+
+    private class SevenChosenState extends GamePlayState {
+        /**
+         * This method will be used to add the given player parameter to the game.
+         *
+         * @param player as the new player for a game as a Player object.
+         */
+        @Override
+        public void addPlayer(Player player) {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to start the game.
+         */
+        @Override
+        public void startGame() {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to choose the given c parameter.
+         *
+         * @param c as the chosen card as a Card object.
+         */
+        @Override
+        public void chooseCard(Card c) {
+            if (canPlay(c)) {
+                game.getPlayerHandler().getCurrentPlayer().playCard(c);
+                increment7Counter();
+                game.getPlayerHandler().nextTurn(1);
+            }
+        }
+
+        /**
+         * This method will be used to skip the current turn.
+         */
+        @Override
+        public void skip() {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to choose the given suit parameter.
+         *
+         * @param suit as the new suit as a Suit enumeration.
+         */
+        @Override
+        public void chooseSuit(Suit suit) {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used whenever a player can't play a card with the number seven.
+         */
+        @Override
+        public void no7() {
+            if (game.getCardHandler().getDiscardPile().size() + game.getCardHandler().getDrawPile().size() - 1 < 2 * get7Counter()) {
+                gamePlayState = gameCanceledState;
+            } else {
+                game.getPlayerHandler().getCurrentPlayer().drawCards(2 * get7Counter());
+                reset7Counter();
+                gamePlayState = normalState;
+            }
+        }
+
+        /**
+         * This method will be used to finish the game.
+         */
+        @Override
+        public void finishGame() {
+            gamePlayState = gameFinishedState;
+        }
+
+        /**
+         * This method will be used to cancel the game.
+         */
+        @Override
+        public void cancelGame() {
+            gamePlayState = gameCanceledState;
+        }
+    }
+
+    /**
+     * This inner class defines the suit chosen state.
+     */
+    private class SuitChosenState extends GamePlayState {
+        /**
+         * This method will be used to add the given player parameter to the game.
+         *
+         * @param player as the new player for a game as a Player object.
+         */
+        @Override
+        public void addPlayer(Player player) {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to start the game.
+         */
+        @Override
+        public void startGame() {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to choose the given c parameter.
+         *
+         * @param c as the chosen card as a Card object.
+         */
+        @Override
+        public void chooseCard(Card c) {
+            if (canPlay(c)) {
+                setChosenSuit(null);
+                game.getPlayerHandler().getCurrentPlayer().playCard(c);
+                if (c.rank() == Rank.SEVEN) {
+                    increment7Counter();
+                    game.getPlayerHandler().nextTurn(1);
+                    gamePlayState = sevenChosenState;
+                } else if (c.rank() == Rank.EIGHT) {
+                    game.getPlayerHandler().nextTurn(2);
+                    gamePlayState = normalState;
+                } else {
+                    game.getPlayerHandler().nextTurn(1);
+                    gamePlayState = normalState;
+                }
+            }
+        }
+
+        /**
+         * This method will be used to skip the current turn.
+         */
+        @Override
+        public void skip() {
+            game.getPlayerHandler().getCurrentPlayer().drawCards(1);
+            game.getPlayerHandler().nextTurn(1);
+        }
+
+        /**
+         * This method will be used to choose the given suit parameter.
+         *
+         * @param suit as the new suit as a Suit enumeration.
+         */
+        @Override
+        public void chooseSuit(Suit suit) {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used whenever a card with the number seven was played.
+         */
+        @Override
+        public void no7() {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to finish the game.
+         */
+        @Override
+        public void finishGame() {
+            gamePlayState = gameFinishedState;
+        }
+
+        /**
+         * This method will be used to cancel the game.
+         */
+        @Override
+        public void cancelGame() {
+            gamePlayState = gameCanceledState;
+        }
+    }
+
+    /**
+     * This inner class defines the jack chosen state.
+     */
+    private class JackChosenState extends GamePlayState {
+        /**
+         * This method will be used to add the given player parameter to the game.
+         *
+         * @param player as the new player for a game as a Player object.
+         */
+        @Override
+        public void addPlayer(Player player) {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to start the game.
+         */
+        @Override
+        public void startGame() {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to choose the given c parameter.
+         *
+         * @param c as the chosen card as a Card object.
+         */
+        @Override
+        public void chooseCard(Card c) {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to skip the current turn.
+         */
+        @Override
+        public void skip() {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to choose the given suit parameter.
+         *
+         * @param suit as the new suit as a Suit enumeration.
+         */
+        @Override
+        public void chooseSuit(Suit suit) {
+            setChosenSuit(suit);
+            game.getPlayerHandler().nextTurn(1);
+            gamePlayState = suitChosenState;
+        }
+
+        /**
+         * This method will be used whenever a card with the number seven was played.
+         */
+        @Override
+        public void no7() {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to finish the game.
+         */
+        @Override
+        public void finishGame() {
+            gamePlayState = gameFinishedState;
+        }
+
+        /**
+         * This method will be used to cancel the game.
+         */
+        @Override
+        public void cancelGame() {
+            gamePlayState = gameCanceledState;
+        }
+    }
+
+    private class GameFinishedState extends GamePlayState {
+        /**
+         * This method will be used to add the given player parameter to the game.
+         *
+         * @param player as the new player for a game as a Player object.
+         */
+        @Override
+        public void addPlayer(Player player) {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to start the game.
+         */
+        @Override
+        public void startGame() {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to choose the given c parameter.
+         *
+         * @param c as the chosen card as a Card object.
+         */
+        @Override
+        public void chooseCard(Card c) {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to skip the current turn.
+         */
+        @Override
+        public void skip() {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to choose the given suit parameter.
+         *
+         * @param suit as the new suit as a Suit enumeration.
+         */
+        @Override
+        public void chooseSuit(Suit suit) {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used whenever a card with the number seven was played.
+         */
+        @Override
+        public void no7() {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to finish the game.
+         */
+        @Override
+        public void finishGame() {
+
+        }
+
+        /**
+         * This method will be used to cancel the game.
+         */
+        @Override
+        public void cancelGame() {
+            /* no action in this state */
+        }
+    }
+
+    private class GameCanceledState extends GamePlayState {
+        /**
+         * This method will be used to add the given player parameter to the game.
+         *
+         * @param player as the new player for a game as a Player object.
+         */
+        @Override
+        public void addPlayer(Player player) {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to start the game.
+         */
+        @Override
+        public void startGame() {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to choose the given c parameter.
+         *
+         * @param c as the chosen card as a Card object.
+         */
+        @Override
+        public void chooseCard(Card c) {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to skip the current turn.
+         */
+        @Override
+        public void skip() {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to choose the given suit parameter.
+         *
+         * @param suit as the new suit as a Suit enumeration.
+         */
+        @Override
+        public void chooseSuit(Suit suit) {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used whenever a card with the number seven was played.
+         */
+        @Override
+        public void no7() {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to finish the game.
+         */
+        @Override
+        public void finishGame() {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be used to cancel the game.
+         */
+        @Override
+        public void cancelGame() {
+
+        }
     }
 }

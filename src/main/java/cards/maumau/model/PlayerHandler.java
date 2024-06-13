@@ -7,98 +7,20 @@ import java.util.List;
 /**
  * Handles players in a MauMau game.
  */
-
-public class PlayerHandler {
+class PlayerHandler {
     private final MauMau game;
     private final List<Player> players = new LinkedList<>();
     private final List<Player> ranking = new ArrayList<>();
     private Player remember;
 
-    public Player getRemember() {return remember;}
-
-    private State state;
-
-    public void setPlayerhandlerstate(State playerhandlerstate) {
-        this.state = playerhandlerstate;
-    }
-
-    private abstract class State {
-        void mau(Player p) {}
-
-        void maumau(Player p) {}
-
-        void nextTurn(int n) {}
-    }
-
-    private final State WaitForNextTurn = new State() {
-        void nextTurn(int n) {
-            if (getCurrentPlayer().getCards().size() == 1) {
-                remember = getCurrentPlayer();
-                localNextTurn(n);
-                state = WaitForMau;
-            }
-            else if (getCurrentPlayer().getCards().isEmpty()) {
-                remember = getCurrentPlayer();
-                localNextTurn(n);
-                state = WaitForMauMau;
-            }
-            else {
-                localNextTurn(n);
-                state = WaitForNextTurn;
-            }
-        }
-    };
-
-    private final State WaitForMau = new State() {
-        void mau(Player p) {
-            if (p == remember) {state = WaitForNextTurn;}
-        }
-
-        void nextTurn(int n) {
-            remember.drawCards(1);
-            if (getCurrentPlayer().getCards().isEmpty()) {
-                remember = getCurrentPlayer();
-                localNextTurn(n);
-                state = WaitForMauMau;
-            }
-            else {
-                localNextTurn(n);
-                state = WaitForNextTurn;
-            }
-        }
-    };
-
-    private final State WaitForMauMau = new State() {
-        void maumau(Player p) {
-            if (p == remember) {
-                finishPlayer(p);
-                if (players.size() == 1) {
-                    finishPlayer(getCurrentPlayer());
-                    game.getActionHandler().finishGame();
-                    state = Finished;
-                }
-                else {
-                    state = WaitForNextTurn;
-                }
-            }
-        }
-
-        void nextTurn(int n) {
-            remember.drawCards(1);
-            if (getCurrentPlayer().getCards().size() == 1) {
-                remember = getCurrentPlayer();
-                localNextTurn(n);
-                state = WaitForMau;
-            }
-            else {
-                localNextTurn(n);
-                state = WaitForNextTurn;
-            }
-        }
-    };
-
-    private final State Finished = new State() {
-    };
+    /**
+     * State pattern.
+     */
+    private PlayerState waitForNextTurnState = new WaitForNextTurnState();                                                   ;
+    private PlayerState waitForMauState = new WaitForMauState();
+    private PlayerState waitForMauMauState = new WaitForMauMauState();
+    private PlayerState finishedState = new FinishedState();
+    private PlayerState currentState;
 
     /**
      * Constructs a PlayerHandler for the specified MauMau game.
@@ -107,7 +29,7 @@ public class PlayerHandler {
      */
     PlayerHandler(MauMau game) {
         this.game = game;
-        setPlayerhandlerstate(WaitForNextTurn);
+        this.currentState = waitForNextTurnState;
     }
 
     /**
@@ -116,7 +38,7 @@ public class PlayerHandler {
      * @param n The number of turns to proceed.
      */
     void nextTurn(int n) {
-        state.nextTurn(n);
+        this.currentState.nextTurn(n);
     }
 
     /**
@@ -125,7 +47,7 @@ public class PlayerHandler {
      * @param p The player calling "Mau".
      */
     void mau(Player p) {
-        state.mau(p);
+        this.currentState.mau(p);
     }
 
     /**
@@ -134,7 +56,7 @@ public class PlayerHandler {
      * @param p The player calling "Mau-Mau".
      */
     void maumau(Player p) {
-        state.maumau(p);
+        this.currentState.maumau(p);
     }
 
     /**
@@ -162,7 +84,9 @@ public class PlayerHandler {
      * @throws IllegalArgumentException if a player with the same name already exists.
      */
     void addPlayer(Player player) {
-        players.add(player);
+        if (!this.players.contains(player)) {
+            this.players.add(player);
+        }
     }
 
     /**
@@ -171,8 +95,8 @@ public class PlayerHandler {
      * @param n The number of turns to proceed.
      */
     private void localNextTurn(int n) {
-        for (int i = 0; i < n; i++) {
-            players.addLast(players.removeFirst());
+        for (int index = 0; index < n; index++) {
+            this.players.add(this.players.removeFirst());
         }
     }
 
@@ -182,8 +106,10 @@ public class PlayerHandler {
      * @param p The player to finish.
      */
     private void finishPlayer(Player p) {
-        players.remove(p);
-        ranking.add(p);
+        if (this.players.contains(p) && !this.ranking.contains(p)) {
+            this.ranking.add(p);
+            this.players.remove(p);
+        }
     }
 
     /**
@@ -193,5 +119,210 @@ public class PlayerHandler {
      */
     Player getCurrentPlayer() {
         return players.isEmpty() ? null : players.getFirst();
+    }
+
+    /**
+     * This abstract inner class defines the player state.
+     * It contains all necessary methods to perform as a state pattern.
+     */
+    private abstract class PlayerState {
+        /**
+         * This method will be used to change the current player to the next one.
+         *
+         * @param n as the number of turns as an Integer.
+         */
+        public abstract void nextTurn(int n);
+
+        /**
+         * This method will be called whenever the given parameter p call the mau signal.
+         *
+         * @param p as the player which calls the mau signal as a Player object.
+         */
+        public abstract void mau(Player p);
+
+        /**
+         * This method will be called whenever the given parameter p call the mau mau signal.
+         *
+         * @param p as the player which calls the mau mau signal as a Player object.
+         */
+        public abstract void maumau(Player p);
+    }
+
+    /**
+     * This inner class defines the wait for next turn state.
+     */
+    private class WaitForNextTurnState extends PlayerState {
+        /**
+         * This method will be used to change the current player to the next one.
+         *
+         * @param n as the number of turns as an Integer.
+         */
+        @Override
+        public void nextTurn(int n) {
+            if (getCurrentPlayer().getCards().size() == 1) {
+                remember = getCurrentPlayer();
+                currentState = waitForMauState;
+            } else if (getCurrentPlayer().getCards().isEmpty()) {
+                remember = getCurrentPlayer();
+                currentState = waitForMauMauState;
+            }
+            localNextTurn(n);
+        }
+
+        /**
+         * This method will be called whenever the given parameter p call the mau signal.
+         *
+         * @param p as the player which calls the mau signal as a Player object.
+         */
+        @Override
+        public void mau(Player p) {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be called whenever the given parameter p call the mau mau signal.
+         *
+         * @param p as the player which calls the mau mau signal as a Player object.
+         */
+        @Override
+        public void maumau(Player p) {
+            /* no action in this state */
+        }
+    }
+
+    /**
+     * This inner class defines the wait for mau state.
+     */
+    private class WaitForMauState extends PlayerState {
+        /**
+         * This method will be used to change the current player to the next one.
+         *
+         * @param n as the number of turns as an Integer.
+         */
+        @Override
+        public void nextTurn(int n) {
+            remember.drawCards(1);
+            if (getCurrentPlayer().getCards().isEmpty()) {
+                remember = getCurrentPlayer();
+                currentState = waitForNextTurnState;
+            }
+            else if (getCurrentPlayer().getCards().size() == 1) {
+                remember = getCurrentPlayer();
+                currentState = waitForMauState;
+            }
+            else {
+                currentState = waitForNextTurnState;
+            }
+            localNextTurn(n);
+        }
+
+        /**
+         * This method will be called whenever the given parameter p call the mau signal.
+         *
+         * @param p as the player which calls the mau signal as a Player object.
+         */
+        @Override
+        public void mau(Player p) {
+            if (p == remember) {
+                currentState = waitForNextTurnState;
+            }
+        }
+
+        /**
+         * This method will be called whenever the given parameter p call the mau mau signal.
+         *
+         * @param p as the player which calls the mau mau signal as a Player object.
+         */
+        @Override
+        public void maumau(Player p) {
+            /* no action in this state */
+        }
+    }
+
+    /**
+     * This inner class defines the wait for mau mau state.
+     */
+    private class WaitForMauMauState extends PlayerState {
+        /**
+         * This method will be used to change the current player to the next one.
+         *
+         * @param n as the number of turns as an Integer.
+         */
+        @Override
+        public void nextTurn(int n) {
+            remember.drawCards(1);
+            if (getCurrentPlayer().getCards().size() == 1) {
+                remember = getCurrentPlayer();
+                currentState = waitForMauState;
+            }
+            else {
+                currentState = waitForNextTurnState;
+            }
+            localNextTurn(n);
+        }
+
+        /**
+         * This method will be called whenever the given parameter p call the mau signal.
+         *
+         * @param p as the player which calls the mau signal as a Player object.
+         */
+        @Override
+        public void mau(Player p) {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be called whenever the given parameter p call the mau mau signal.
+         *
+         * @param p as the player which calls the mau mau signal as a Player object.
+         */
+        @Override
+        public void maumau(Player p) {
+            if (p == remember) {
+                finishPlayer(p);
+                if (players.size() == 1) {
+                    finishPlayer(getCurrentPlayer());
+                    game.getActionHandler().finishGame();
+                    currentState = finishedState;
+                } else {
+                    currentState = waitForNextTurnState;
+                }
+            }
+        }
+    }
+
+    /**
+     * This inner class defines the finished state.
+     */
+    private class FinishedState extends PlayerState {
+        /**
+         * This method will be used to change the current player to the next one.
+         *
+         * @param n as the number of turns as an Integer.
+         */
+        @Override
+        public void nextTurn(int n) {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be called whenever the given parameter p call the mau signal.
+         *
+         * @param p as the player which calls the mau signal as a Player object.
+         */
+        @Override
+        public void mau(Player p) {
+            /* no action in this state */
+        }
+
+        /**
+         * This method will be called whenever the given parameter p call the mau mau signal.
+         *
+         * @param p as the player which calls the mau mau signal as a Player object.
+         */
+        @Override
+        public void maumau(Player p) {
+            /* no action in this state */
+        }
     }
 }
