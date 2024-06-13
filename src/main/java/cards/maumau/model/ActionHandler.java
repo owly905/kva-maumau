@@ -8,10 +8,158 @@ import cards.Suit;
  * Manages the actions and state transitions within a MauMau game.
  */
 class ActionHandler {
+
     private final MauMau game;
     private Suit chosenSuit;
     private int ctr7 = 0;
+    private State state;
+
+    public State getState() {return state;}
+
+    public void setState(State state) {
+        State formerstate = this.state;
+        this.state = state;
+        if (state == Game_intialized) {
+            state.setInnerState(state.getInnerState());
+            gameState = GameState.GAME_INITIALIZED;
+        } // init
+
+        if (formerstate == Game_intialized) {
+            state.setInnerState(state.getInnerState());
+            gameState = GameState.PLAY;
+        }// Übergang von init zu play
+
+        if (formerstate == Game_Play && state == Choose_Suit) {
+            state.setInnerState(state.getInnerState());
+            gameState = GameState.CHOOSE_SUIT;
+        } // Übergang von play zu choose suit
+
+        if (formerstate == Choose_Suit) {
+            state.setInnerState(state.getInnerState2());
+            gameState = GameState.PLAY;
+        } // Übergang von choose suit zu play
+
+        if (state == Game_Canceled) {
+            state.setInnerState(state.getInnerState());
+            gameState = GameState.GAME_CANCELED;
+        }
+
+        if (state == Game_Over) {
+            state.setInnerState(state.getInnerState());
+            gameState = GameState.GAME_OVER;
+        }
+    }
+
     private GameState gameState;
+
+    public abstract class State {
+        private ActionHandler actionHandler;
+
+        public ActionHandler getActionHandler() {return actionHandler;}
+
+        private InnerState innerState;
+
+        public InnerState getInnerState0() {
+            return innerState;
+        }
+
+        public void setInnerState(InnerState innerstate) {
+            this.innerState = innerstate;
+        }
+
+        void startGame() {innerState.startGame();}
+
+        void finishGame() {innerState.finishGame();}
+
+        void cancelGame() {innerState.cancelGame();}
+
+        void chooseCard(Card c) {innerState.chooseCard(c);}
+
+        void chooseSuit(Suit suit) {innerState.chooseSuit(suit);}
+
+        void skip() {innerState.skip();}
+
+        void no7() {innerState.no7();}
+
+        public InnerState getInnerState() {return null;}
+
+        public InnerState getInnerState2() {return null;}
+
+        public InnerState getInnerState3() {return null;}
+
+        State(ActionHandler a) {
+            actionHandler = a;
+        }
+    }
+
+    public final State Game_intialized = new State(this) {
+        final Initialzed initialzed = new Initialzed(getActionHandler());
+
+        @Override
+        public InnerState getInnerState() {return initialzed;}
+    };
+
+    public final State Game_Play = new State(this) {
+        final Normal normal = new Normal(getActionHandler());
+        final SevenChosen sevenChosen = new SevenChosen(getActionHandler());
+        final SuitChosen suitChosen = new SuitChosen(getActionHandler());
+
+        @Override
+        public InnerState getInnerState() {return normal;}
+
+        @Override
+        public InnerState getInnerState2() {return suitChosen;}
+
+        @Override
+        public InnerState getInnerState3() {return sevenChosen;}
+    };
+
+    public final State Game_Over = new State(this) {
+        final GameFinished gameFinished = new GameFinished(getActionHandler());
+
+        @Override
+        public InnerState getInnerState() {return gameFinished;}
+    };
+
+    public final State Game_Canceled = new State(this) {
+        private final GameCanceled gameCanceled = new GameCanceled(getActionHandler());
+
+        @Override
+        public InnerState getInnerState() {return gameCanceled;}
+    };
+
+    public final State Choose_Suit = new State(this) {
+        private final JackChosen jackChosen = new JackChosen(getActionHandler());
+
+        @Override
+        public InnerState getInnerState() {return jackChosen;}
+    };
+
+    /**
+     * Keine Ahnung nicht löschen
+     *
+     * @return
+     */
+    public State getGame_intialized() {
+        return Game_intialized;
+    }
+
+    public State getGame_Play() {
+        return Game_Play;
+    }
+
+    public State getGame_Over() {
+        return Game_Over;
+    }
+
+    public State getGame_Canceled() {
+        return Game_Canceled;
+    }
+
+    public State getChoose_Suit() {
+        return Choose_Suit;
+    }
+
     /**
      * Constructs an ActionHandler for the specified MauMau game.
      *
@@ -19,6 +167,7 @@ class ActionHandler {
      */
     ActionHandler(MauMau game) {
         this.game = game;
+        setState(getGame_intialized());
     }
 
     /**
@@ -34,21 +183,22 @@ class ActionHandler {
      * Starts the game.
      */
     void startGame() {
-        game.getCardHandler().dealCards();
+        setState(getGame_intialized());
+        state.startGame();
     }
 
     /**
      * Transitions the game state to GAME_OVER.
      */
     void finishGame() {
-        //TODO implement
+        state.finishGame();
     }
 
     /**
      * Transitions the game state to GAME_CANCELED.
      */
     void cancelGame() {
-        //TODO implement
+        state.cancelGame();
     }
 
     /**
@@ -57,7 +207,7 @@ class ActionHandler {
      * @param c The card chosen by the player.
      */
     void chooseCard(Card c) {
-        //TODO
+        state.chooseCard(c);
         /*
         if(game.getPlayerHandler().getCurrentPlayer().canPlay(c)){
             game.getPlayerHandler().getCurrentPlayer().playCard(c);
@@ -76,14 +226,14 @@ class ActionHandler {
      * @param suit The suit chosen by the player.
      */
     void chooseSuit(Suit suit) {
-        //TODO
+        state.chooseSuit(suit);
     }
 
     /**
      * Lets the player skip a round.
      **/
     void skip() {
-        //TODO
+        state.skip();
         /*
         game.getCardHandler().drawCard();
         game.getPlayerHandler().nextTurn(1);
@@ -95,7 +245,7 @@ class ActionHandler {
      * Handles the player saying "no 7" in the current state.
      */
     void no7() {
-        //TODO
+        state.no7();
     }
 
     /**
@@ -162,7 +312,23 @@ class ActionHandler {
      * @return True if the card can be played, false otherwise.
      */
     boolean canPlay(Card c) {
-        //TODO implement
+        State currentState = getState();
+        Card topCard = game.getCardHandler().top();
+
+        if (currentState == this.getGame_Play()) {
+            InnerState innerState = currentState.innerState;
+
+            if (innerState instanceof SuitChosen) {
+                return c.suit() == getChosenSuit() && c.rank() != Rank.JACK;
+            }
+            else if (innerState instanceof SevenChosen) {
+                return c.suit() == topCard.suit() || c.rank() == topCard.rank() || c.rank() == Rank.SEVEN;
+            }
+            else if (innerState instanceof Normal) {
+                return c.suit() == topCard.suit() || c.rank() == topCard.rank() || c.rank() == Rank.JACK;
+            }
+        }
+
         return false;
     }
 }

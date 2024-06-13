@@ -14,9 +14,7 @@ public class PlayerHandler {
     private final List<Player> ranking = new ArrayList<>();
     private Player remember;
 
-    public Player getRemember() {
-        return remember;
-    }
+    public Player getRemember() {return remember;}
 
     private State state;
 
